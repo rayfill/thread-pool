@@ -16,9 +16,9 @@
 
 (let (cought-error)
   (handler-case 
-      (exec-test 'abort-execute)
-    (reject-error (e) (setf cought-error e)))
-  (is (class-of cought-error) (find-class 'reject-error)))
+      (exec-test 'abort-queuing)
+    (reject-warning (e) (setf cought-error e)))
+  (is (class-of cought-error) (find-class 'reject-warning)))
 
 (defparameter *result* nil)
 (let ((*result* nil))
@@ -38,9 +38,9 @@
 (let ((result nil))
   (handler-case
       (exec-test 'discard (lambda () (error 'simple-error)))
-    (execute-policy:discard-condition (e) (setf result e)))
+    (execute-policy:discard-warning (e) (setf result e)))
   (isnt result nil)
-  (is (class-of result) (find-class 'execute-policy:discard-condition)))
+  (is (class-of result) (find-class 'execute-policy:discard-warning)))
 	
 
 

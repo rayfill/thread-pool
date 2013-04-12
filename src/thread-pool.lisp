@@ -9,11 +9,10 @@
   (:import-from :local-time :now :sec-of :nsec-of)
   (:import-from :sb-thread :thread :join-thread
 		:make-semaphore :try-semaphore :semaphore-count)
-  (:import-from :execute-policy :abort-execute :caller-runs
+  (:import-from :execute-policy :abort-queuing :caller-runs
 		:discard-oldest :discard
-		:reject-error :discard-condition
 		:queue-flood)
-  (:export :thread-pool :reject-error
+  (:export :thread-pool :start
 	   :wait-shtudown-complete :shutdown :execute))
 
 (in-package :thread-pool)
@@ -48,11 +47,26 @@
 	    poison-pill (gensym)
 	    policy exec-policy))))
 
-(defgeneric execute (instance work))
-;(defmethod execute ((instance thread-pool) work)
-;  (with-slots 
-  
+(defgeneric start (instance))
+(defmethod start ((instance thread-pool))
+  (with-slots (workers)
+      instance
+    (workers:start-workers workers)))
 
+(defgeneric execute (instance work))
+(defmethod execute ((instance thread-pool) work)
+  (unless (functionp work)
+    (error 'simple-error :format-control "invalid argument: work, not a function."))
+  (with-slots (check-interval check-times policy queue)
+      instance
+    (loop
+       for rest-times from check-times downto 1
+       when (offer queue work)
+       return work
+       end
+       when (queue-flood queue policy)
+       do (sleep check-interval)
+       end)))
 
 (defgeneric shutdown (instance &key wait-p))
 (defmethod shutdown ((instance thread-pool) &key (wait-p nil))

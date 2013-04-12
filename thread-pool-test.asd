@@ -1,7 +1,3 @@
-#|
-  This file is a part of thread-pool project.
-|#
-
 (in-package :cl-user)
 (defpackage thread-pool-test-asd
   (:use :cl :asdf))

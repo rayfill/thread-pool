@@ -2,8 +2,7 @@
 (defpackage thread-pool
   (:use :cl)
   (:import-from :kmrcl :with-gensyms)
-  (:import-from :queues :put :offer :take :poll :peek)
-  (:import-from :blocking-queue :blocking-queue)
+  (:import-from :queues :put :offer :take :poll :peek :blocking-queue)
   (:import-from :workers :create-workers :wait-workers
 		:kill-workers :workers-count :workers-start-p)
   (:import-from :local-time :now :sec-of :nsec-of)
@@ -159,4 +158,4 @@
 	    ,@body)
        (shutdown ,sym t))))
 
-(defvar *default-thread-pool* (make-instance 'thread-pool))
+(defvar *default-thread-pool* (make-instance 'thread-pool :autostart-p t))
